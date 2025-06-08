@@ -1,0 +1,49 @@
+version: '3.8'  # Utilisation de la version 3.8 qui est plus récente et compatible avec la plupart des cas
+
+services:
+  # Service FastAPI (désactivé pour l'instant — tu pourras l'activer plus tard)
+  # fastapi:
+  #   build: .
+  #   container_name: fastapi_bdia
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://bdia_user:bdia_pass@postgres/bdia_db
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - app-network
+
+  postgres:
+    image: postgres:13
+    container_name: postgres_bdia
+    environment:
+      POSTGRES_USER: bdia_user
+      POSTGRES_PASSWORD: bdia_pass
+      POSTGRES_DB: bdia_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_bdia
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bdia.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:  
+    driver: bridge
+
+volumes:
+  pgdata:
