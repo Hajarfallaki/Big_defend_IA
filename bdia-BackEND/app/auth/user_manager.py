@@ -3,6 +3,7 @@ from fastapi_users import BaseUserManager, IntegerIDMixin
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from app.models.user import User
 from app.core.database import get_async_db
+from app.logging.log_setup import logger
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = "SECRET"  # Utilisez settings.SECRET_KEY en prod

@@ -13,6 +13,8 @@ from fastapi_users.authentication import (
     BearerTransport,
     JWTStrategy,
 )
+from app.logging.log_setup import logger
+logger.info("Démarrage de l'application")
 
 app = FastAPI()
 

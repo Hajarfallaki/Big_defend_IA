@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 import os
+from app.logging.log_setup import logger
 
 def create_fake_model():
     # Simuler des données basées sur : montant, heure (extrait depuis date)

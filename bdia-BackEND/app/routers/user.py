@@ -4,6 +4,7 @@ from app.schemas.user import UserCreate, UserRead
 from app.models.user import User
 from app.core.database import get_db
 from app.auth.hash import hash_password
+from app.logging.log_setup import logger
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

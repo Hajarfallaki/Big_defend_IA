@@ -3,6 +3,7 @@
 import joblib
 import numpy as np
 from app.models.schemas import TransactionInput
+from app.logging.log_setup import logger
 
 # Chargement du modèle et du scaler
 model = joblib.load("app/ml_models/fraud_detector.pkl")

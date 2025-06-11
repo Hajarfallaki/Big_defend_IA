@@ -1,7 +1,7 @@
-version: '3.8'  # Utilisation de la version 3.8 qui est plus récente et compatible avec la plupart des cas
+version: '3.8'
 
 services:
-  # Service FastAPI (désactivé pour l'instant — tu pourras l'activer plus tard)
+  # Service FastAPI (désactivé pour l'instant)
   # fastapi:
   #   build: .
   #   container_name: fastapi_bdia
@@ -9,8 +9,10 @@ services:
   #     - "8000:8000"
   #   environment:
   #     - DATABASE_URL=postgresql://bdia_user:bdia_pass@postgres/bdia_db
+  #     - MONGODB_URI=mongodb://mongo:27017/logs_db
   #   depends_on:
   #     - postgres
+  #     - mongo
   #   networks:
   #     - app-network
 
@@ -41,9 +43,40 @@ services:
     networks:
       - app-network
 
+  # ✅ MongoDB pour les logs
+  mongo:
+    image: mongo:latest
+    container_name: mongo_logs
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: logs_db
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - app-network
+
+  # (Optionnel) Interface web pour MongoDB
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express_logs
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
 networks:
-  app-network:  
+  app-network:
     driver: bridge
 
 volumes:
   pgdata:
+  mongodata:

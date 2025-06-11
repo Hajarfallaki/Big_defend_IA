@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.alert import Alert
 from app.schemas.alert import AlertRead
 from app.core.database import get_db
+from app.logging.log_setup import logger
 
 router = APIRouter(prefix="/alerts", tags=["Alerts"])
 

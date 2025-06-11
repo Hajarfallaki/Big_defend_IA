@@ -5,6 +5,7 @@ from app.models.transaction import Transaction
 from app.core.database import get_db
 from app.schemas.transaction import TransactionCreate, TransactionRead
 from app.services.fraud_detection import predict_fraud
+from app.logging.log_setup import logger
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
