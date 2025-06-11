@@ -14,4 +14,4 @@ class UserRead(schemas.BaseUser[int]):
     role: str
 
     class Config:
-        orm_mode = True  # Assure-toi que la conversion SQLAlchemy -> Pydantic fonctionne
+        from_attributes = True  # Assure-toi que la conversion SQLAlchemy -> Pydantic fonctionne
