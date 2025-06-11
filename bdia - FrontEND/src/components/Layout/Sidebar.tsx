@@ -61,7 +61,7 @@ const Sidebar: React.FC = () => {
     <div className="bg-slate-900 text-white w-64 min-h-screen p-4">
       <div className="flex items-center gap-3 mb-8">
         <Shield className="h-8 w-8 text-blue-400" />
-        <h1 className="text-xl font-bold">FraudGuard</h1>
+        <h1 className="text-xl font-bold">BigDefend AI</h1>
       </div>
       
       <nav className="space-y-2">
