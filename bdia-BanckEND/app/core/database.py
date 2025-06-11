@@ -23,3 +23,11 @@ SyncSessionLocal = sessionmaker(bind=sync_engine)
 async def get_async_db():
     async with AsyncSessionLocal() as db:
         yield db
+
+# ✅ Pour usage sync (ex : dépendances classiques dans tes routes actuelles)
+def get_db():
+    db = SyncSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

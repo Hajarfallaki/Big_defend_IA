@@ -3,7 +3,10 @@ from fastapi_users import FastAPIUsers
 from app.core.database import async_engine, Base
 from app.core.config import settings
 from app.models.user import User
+from app.routers import alerts
+
 from app.auth.user_manager import get_user_manager
+from app.routers.transaction import router as transactions  # ✅
 from app.schemas.user import UserRead, UserCreate  # Ajout des schémas
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -12,6 +15,12 @@ from fastapi_users.authentication import (
 )
 
 app = FastAPI()
+
+# Inclusion des routes de transactions
+app.include_router(transactions)
+
+# Inclusion des routes d'alertes
+app.include_router(alerts.router)
 
 # Configuration JWT
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
