@@ -5,76 +5,109 @@ import {
   Users, 
   TrendingUp,
   Shield,
-  Activity
+  Activity,
+  Brain
 } from 'lucide-react';
 import StatCard from '../components/Dashboard/StatCard';
 import AlertsOverview from '../components/Dashboard/AlertsOverview';
 import TransactionChart from '../components/Dashboard/TransactionChart';
+import MLInsights from '../components/Dashboard/MLInsights';
+import RealTimeChart from '../components/Dashboard/RealTimeChart';
 import { useAuth } from '../contexts/AuthContext';
-import { mockRiskMetrics } from '../data/mockData';
+import { useDataset } from '../hooks/useDataset';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { transactions, alerts, riskMetrics, loading, error } = useDataset();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Chargement du dataset BigDefend AI...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   const getStatsForRole = () => {
+    const totalTransactions = transactions.length;
+    const flaggedTransactions = transactions.filter(t => t.status === 'flagged').length;
+    const activeAlerts = alerts.filter(a => a.status === 'open' || a.status === 'investigating').length;
+    const avgRiskScore = transactions.reduce((sum, t) => sum + t.riskScore, 0) / totalTransactions;
+
     switch (user?.role) {
       case 'admin':
         return [
           {
-            title: 'Transactions Totales',
-            value: '125,430',
-            change: '+12% ce mois',
-            changeType: 'positive' as const,
+            title: 'Transactions Analysées',
+            value: totalTransactions.toLocaleString(),
+            change: 'Dataset Kaggle',
+            changeType: 'neutral' as const,
             icon: CreditCard,
             color: 'blue' as const
           },
           {
-            title: 'Alertes Actives',
-            value: '23',
-            change: '-8% cette semaine',
-            changeType: 'positive' as const,
+            title: 'Fraudes Détectées',
+            value: flaggedTransactions.toString(),
+            change: `${((flaggedTransactions / totalTransactions) * 100).toFixed(2)}% du total`,
+            changeType: 'negative' as const,
             icon: AlertTriangle,
             color: 'red' as const
           },
           {
-            title: 'Clients Surveillés',
-            value: '1,247',
-            change: '+5% ce mois',
-            changeType: 'positive' as const,
+            title: 'Alertes Actives',
+            value: activeAlerts.toString(),
+            change: 'Nécessitent attention',
+            changeType: 'neutral' as const,
             icon: Users,
-            color: 'green' as const
+            color: 'yellow' as const
           },
           {
-            title: 'Précision du Modèle',
-            value: '94.2%',
-            change: '+2.1% ce mois',
+            title: 'Score Risque Moyen',
+            value: `${avgRiskScore.toFixed(1)}%`,
+            change: `Précision: ${riskMetrics ? (riskMetrics.accuracy * 100).toFixed(1) : 'N/A'}%`,
             changeType: 'positive' as const,
-            icon: TrendingUp,
+            icon: Brain,
             color: 'purple' as const
           }
         ];
       case 'analyst':
+        const assignedAlerts = alerts.filter(a => a.assignedTo?.includes('analyst')).length;
+        const resolvedToday = Math.floor(Math.random() * 10) + 5;
         return [
           {
             title: 'Alertes Assignées',
-            value: '8',
-            change: '3 nouvelles',
+            value: assignedAlerts.toString(),
+            change: 'À traiter',
             changeType: 'neutral' as const,
             icon: AlertTriangle,
             color: 'red' as const
           },
           {
-            title: 'Cas Résolus',
-            value: '156',
-            change: '+15 cette semaine',
+            title: 'Cas Résolus Aujourd\'hui',
+            value: resolvedToday.toString(),
+            change: '+3 depuis hier',
             changeType: 'positive' as const,
             icon: Shield,
             color: 'green' as const
           },
           {
-            title: 'Taux de Précision',
+            title: 'Précision Personnelle',
             value: '96.8%',
-            change: 'Personnel',
+            change: 'Au-dessus de la moyenne',
             changeType: 'positive' as const,
             icon: TrendingUp,
             color: 'blue' as const
@@ -83,12 +116,12 @@ const Dashboard: React.FC = () => {
       case 'manager':
         return [
           {
-            title: 'Risque Global',
-            value: 'Modéré',
-            change: 'Stable',
-            changeType: 'neutral' as const,
-            icon: Shield,
-            color: 'yellow' as const
+            title: 'Performance Globale',
+            value: riskMetrics ? `${(riskMetrics.accuracy * 100).toFixed(1)}%` : 'N/A',
+            change: 'Modèle BigDefend AI',
+            changeType: 'positive' as const,
+            icon: Brain,
+            color: 'purple' as const
           },
           {
             title: 'Équipe Active',
@@ -99,19 +132,20 @@ const Dashboard: React.FC = () => {
             color: 'green' as const
           },
           {
-            title: 'Performance',
-            value: '94.2%',
-            change: '+1.5% ce mois',
+            title: 'Taux de Faux Positifs',
+            value: riskMetrics ? `${((riskMetrics.falsePositives / riskMetrics.flaggedTransactions) * 100).toFixed(1)}%` : 'N/A',
+            change: 'En amélioration',
             changeType: 'positive' as const,
             icon: Activity,
-            color: 'purple' as const
+            color: 'yellow' as const
           }
         ];
       case 'client':
+        const userTransactions = Math.floor(Math.random() * 20) + 30;
         return [
           {
             title: 'Mes Transactions',
-            value: '47',
+            value: userTransactions.toString(),
             change: 'Ce mois',
             changeType: 'neutral' as const,
             icon: CreditCard,
@@ -120,7 +154,7 @@ const Dashboard: React.FC = () => {
           {
             title: 'Statut Sécurité',
             value: 'Sécurisé',
-            change: 'Aucune alerte',
+            change: 'BigDefend AI actif',
             changeType: 'positive' as const,
             icon: Shield,
             color: 'green' as const
@@ -136,9 +170,12 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800">BigDefend AI Dashboard</h1>
+          <p className="text-slate-600 mt-1">Système de détection de fraude alimenté par l'IA</p>
+        </div>
         <div className="text-sm text-slate-600">
-          Dernière mise à jour: {new Date().toLocaleString('fr-FR')}
+          Dataset: {transactions.length.toLocaleString()} transactions • Dernière mise à jour: {new Date().toLocaleString('fr-FR')}
         </div>
       </div>
 
@@ -155,55 +192,55 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {user?.role === 'manager' && (
-        <div className="grid grid-cols-1 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Métriques de Performance</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{mockRiskMetrics.accuracy * 100}%</div>
-                <div className="text-sm text-slate-600">Précision</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{mockRiskMetrics.precision * 100}%</div>
-                <div className="text-sm text-slate-600">Précision</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{mockRiskMetrics.recall * 100}%</div>
-                <div className="text-sm text-slate-600">Rappel</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{mockRiskMetrics.falsePositives}</div>
-                <div className="text-sm text-slate-600">Faux Positifs</div>
-              </div>
-            </div>
+      {user?.role === 'admin' && riskMetrics && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MLInsights riskMetrics={riskMetrics} />
+          <div className="space-y-6">
+            <RealTimeChart transactions={transactions} />
           </div>
+        </div>
+      )}
+
+      {user?.role === 'manager' && riskMetrics && (
+        <div className="grid grid-cols-1 gap-6">
+          <MLInsights riskMetrics={riskMetrics} />
+          <RealTimeChart transactions={transactions} />
         </div>
       )}
 
       {user?.role === 'client' && (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4">Activité Récente</h3>
+          <h3 className="text-lg font-semibold text-slate-800 mb-4">Protection BigDefend AI</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <div>
-                  <p className="font-medium">Paiement autorisé</p>
-                  <p className="text-sm text-slate-600">Achat en ligne - 89.99€</p>
+                  <p className="font-medium">Protection Active</p>
+                  <p className="text-sm text-slate-600">Surveillance 24/7 par IA</p>
                 </div>
               </div>
-              <span className="text-sm text-slate-500">Il y a 2h</span>
+              <Shield className="h-5 w-5 text-green-500" />
             </div>
             <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <div>
-                  <p className="font-medium">Virement effectué</p>
-                  <p className="text-sm text-slate-600">Vers compte épargne - 500€</p>
+                  <p className="font-medium">Analyse Comportementale</p>
+                  <p className="text-sm text-slate-600">Détection des anomalies en temps réel</p>
                 </div>
               </div>
-              <span className="text-sm text-slate-500">Hier</span>
+              <Brain className="h-5 w-5 text-blue-500" />
+            </div>
+            <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <div>
+                  <p className="font-medium">Modèle ML Avancé</p>
+                  <p className="text-sm text-slate-600">Précision de {riskMetrics ? (riskMetrics.accuracy * 100).toFixed(1) : '94'}%</p>
+                </div>
+              </div>
+              <TrendingUp className="h-5 w-5 text-purple-500" />
             </div>
           </div>
         </div>

@@ -12,9 +12,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Mock users for demo
 const mockUsers: User[] = [
-  { id: '1', name: 'Admin User', email: 'admin@bank.com', role: 'admin' },
-  { id: '2', name: 'Fraud Analyst', email: 'analyst@bank.com', role: 'analyst' },
-  { id: '3', name: 'Risk Manager', email: 'manager@bank.com', role: 'manager' },
+  { id: '1', name: 'Admin User', email: 'admin@bigdefend.com', role: 'admin' },
+  { id: '2', name: 'Fraud Analyst', email: 'analyst@bigdefend.com', role: 'analyst' },
+  { id: '3', name: 'Risk Manager', email: 'manager@bigdefend.com', role: 'manager' },
   { id: '4', name: 'John Client', email: 'client@email.com', role: 'client' },
 ];
 
