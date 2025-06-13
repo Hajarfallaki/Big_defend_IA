@@ -1,19 +1,27 @@
-from fastapi_users.authentication import (
-    AuthenticationBackend,
-    BearerTransport,
-    JWTStrategy,
+from fastapi_users.authentication import JWTAuthentication, AuthenticationBackend
+from fastapi_users import FastAPIUsers
+
+SECRET = "votre-secret-super-secret"  # Changez ceci pour un vrai secret en production
+
+# Configuration JWT
+jwt_authentication = JWTAuthentication(
+    secret=SECRET,
+    lifetime_seconds=3600,
+    tokenUrl="auth/jwt/login"
 )
 
-bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
-
-def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(
-        secret="votre_secret_key",  # Utilisez settings.SECRET_KEY en production
-        lifetime_seconds=3600
-    )
-
+# Créez un backend d'authentification
 auth_backend = AuthenticationBackend(
     name="jwt",
-    transport=bearer_transport,
-    get_strategy=get_jwt_strategy,
+    transport=None,
+    get_strategy=lambda: jwt_authentication,
+)
+
+fastapi_users = FastAPIUsers(
+    get_user_manager,
+    [auth_backend],  # Passez le backend ici, pas la stratégie directement
+    User,
+    UserCreate,
+    UserUpdate,
+    UserDB,
 )

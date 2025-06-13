@@ -14,14 +14,19 @@ __pycache__/
 .coverage
 
 # Fichiers sensibles
-.env
-*.env
-secrets.json
+# .env
+# *.env
+# secrets.json
 
 # Modèles ML (si non partagés)
 app/models/fraud_detector.pkl
+app/models/
 
 # Autres
 dist/
 build/
 *.egg-info/
+
+
+*.csv
+*.pkl

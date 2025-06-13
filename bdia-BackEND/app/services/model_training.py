@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SyncSessionLocal  # ou get_db si asynchrone, mais ici sync
 from app.models.transaction import Transaction
+from app.logging.log_setup import logger
 
 def retrain_model() -> bool:
     try:
