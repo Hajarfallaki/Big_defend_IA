@@ -19,8 +19,10 @@ export class DataService {
 
     try {
       // Charger le dataset depuis GitHub
-      const response = await fetch('https://github.com/nsethi31/Kaggle-Data-Credit-Card-Fraud-Detection/raw/master/creditcard.csv');
-      const csvText = await response.text();
+      //const response = await fetch('https://github.com/nsethi31/Kaggle-Data-Credit-Card-Fraud-Detection/raw/master/creditcard.csv');
+      //const csvText = await response.text();
+      const response = await fetch('/creditcard.csv');
+      const data = await response.text();
       
       // Parser le CSV
       const lines = csvText.split('\n');

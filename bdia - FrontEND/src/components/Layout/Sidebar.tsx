@@ -28,28 +28,18 @@ const Sidebar: React.FC = () => {
           { to: '/alerts', icon: AlertTriangle, label: 'Alertes IA' },
           { to: '/transactions', icon: CreditCard, label: 'Transactions' },
           { to: '/clients', icon: Users, label: 'Clients' },
-          { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-          { to: '/models', icon: Brain, label: 'Modèles IA' },
-          { to: '/settings', icon: Settings, label: 'Paramètres' },
         ];
       case 'analyst':
         return [
           ...baseItems,
           { to: '/alerts', icon: AlertTriangle, label: 'Alertes IA' },
           { to: '/transactions', icon: CreditCard, label: 'Transactions' },
-          { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-        ];
-      case 'manager':
-        return [
-          ...baseItems,
-          { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-          { to: '/reports', icon: TrendingUp, label: 'Rapports' },
         ];
       case 'client':
         return [
           ...baseItems,
           { to: '/my-transactions', icon: CreditCard, label: 'Mes Transactions' },
-          { to: '/security', icon: Shield, label: 'Sécurité' },
+       
         ];
       default:
         return baseItems;

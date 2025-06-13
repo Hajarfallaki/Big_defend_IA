@@ -29,7 +29,6 @@ const Login: React.FC = () => {
   const demoAccounts = [
     { email: 'admin@bigdefend.com', role: 'Administrateur IA', password: 'admin123', icon: Shield },
     { email: 'analyst@bigdefend.com', role: 'Analyste Fraude', password: 'analyst123', icon: Brain },
-    { email: 'manager@bigdefend.com', role: 'Manager Risques', password: 'manager123', icon: TrendingUp },
     { email: 'client@email.com', role: 'Client Protégé', password: 'client123', icon: Shield },
   ];
 
@@ -49,7 +48,7 @@ const Login: React.FC = () => {
             <p className="text-slate-600 mt-2">Système de Détection de Fraude Intelligent</p>
             <div className="flex items-center justify-center gap-2 mt-3 text-sm text-slate-500">
               <Shield className="h-4 w-4" />
-              <span>Alimenté par le Dataset Kaggle</span>
+        
             </div>
           </div>
 

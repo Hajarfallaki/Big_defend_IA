@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'analyst' | 'manager' | 'client';
+  role: 'admin' | 'analyst' | 'client';
   avatar?: string;
 }
 
@@ -37,12 +37,9 @@ export interface Client {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  accountNumber: string;
-  riskProfile: 'low' | 'medium' | 'high';
-  joinDate: Date;
-  totalTransactions: number;
-  flaggedTransactions: number;
+  role: 'client' | 'analyst' | 'admin';
+  status: 'active' | 'inactive' | 'pending';
+  createdAt: string;
 }
 
 export interface RiskMetrics {

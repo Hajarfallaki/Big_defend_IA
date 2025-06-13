@@ -1,11 +1,11 @@
 import React from 'react';
-import { Bell, User, LogOut, Brain, Shield } from 'lucide-react';
+import { Bell, User, LogOut, Brain, Shield, Wifi, WifiOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDataset } from '../../hooks/useDataset';
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
-  const { alerts, riskMetrics } = useDataset();
+  const { alerts, riskMetrics, isConnected } = useDataset();
 
   const activeAlerts = alerts.filter(a => a.status === 'open' || a.status === 'investigating').length;
 
@@ -28,7 +28,28 @@ const Header: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          {/* Statut IA */}
+          {/* Connection Status */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
+            isConnected 
+              ? 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200' 
+              : 'bg-gradient-to-r from-red-50 to-orange-50 border-red-200'
+          }`}>
+            {isConnected ? (
+              <>
+                <Wifi className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-700">Temps Réel</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-4 w-4 text-red-600" />
+                <span className="text-sm font-medium text-red-700">Hors Ligne</span>
+                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              </>
+            )}
+          </div>
+
+          {/* AI Status */}
           <div className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
             <Shield className="h-4 w-4 text-green-600" />
             <span className="text-sm font-medium text-slate-700">IA Active</span>
@@ -39,7 +60,7 @@ const Header: React.FC = () => {
           <button className="relative p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors">
             <Bell className="h-5 w-5" />
             {activeAlerts > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                 {activeAlerts}
               </span>
             )}
