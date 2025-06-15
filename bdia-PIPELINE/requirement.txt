@@ -1,0 +1,6 @@
+xgboost
+mlflow==2.12.1
+imbalanced-learn
+seaborn
+kafka-python
+confluent-kafka
