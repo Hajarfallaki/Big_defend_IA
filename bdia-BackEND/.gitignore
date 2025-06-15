@@ -1,0 +1,32 @@
+# Environnement virtuel
+venv/
+
+# Fichiers Python compilés
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers temporaires
+*.log
+*.cache
+.pytest_cache/
+.coverage
+
+# Fichiers sensibles
+# .env
+# *.env
+# secrets.json
+
+# Modèles ML (si non partagés)
+app/models/fraud_detector.pkl
+app/models/
+
+# Autres
+dist/
+build/
+*.egg-info/
+
+
+*.csv
+*.pkl
