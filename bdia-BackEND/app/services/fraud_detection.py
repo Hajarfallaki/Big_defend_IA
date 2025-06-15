@@ -6,7 +6,7 @@ from app.models.schemas import TransactionInput
 from app.logging.log_setup import logger
 
 # Chargement du modèle (RandomForest ou XGBoost)
-model = joblib.load("app/ml_models/RandomForest.pkl")
+model = joblib.load("app/ml_models/XGBoost.pkl")
 scaler = joblib.load("app/ml_models/scaler.pkl")
 
 def preprocess_transaction(transaction: TransactionInput) -> np.ndarray:
