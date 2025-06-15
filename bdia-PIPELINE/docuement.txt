@@ -1,0 +1,35 @@
+====================================================================
+
+execution du fichier docker-compose 
+
+- docker-compose run --rm airflow-webserver airflow db upgrade
+- docker-compose up -d
+
+on entre dans le teminal  de airflo  via la ligne de commande ave le user  root(aut pas entre dans le  terminal avec docker compose car 
+par defaut le user est airflow et tu ne pourra pas executer la commande suivant )
+
+commande pour termianle 
+docker exec  -u root -it nom_du_conteneur bash
+
+creer un  user admin pour airflow
+airflow users create \
+          --username admin \
+          --firstname admin \
+          --lastname admin \
+          --role Admin \
+          --email admin@example.org
+
+tu peux choisir le mail  et le usser selon ton besoin
+apres cette commande on peut t inviter a entre le passwor et le confirmé: il faut donc  entrer la meme chose 
+
+apres tu peu te  conneecter a airflow via le port que tu a choisi 
+
+=>  copy le fichier  requiermet dans vers le conteunuer docker  airflow  de webserver et schelduler
+
+docker copy requiermet.txt nom_docker:/op/airflow
+
+tu peut entrer dans terminal de airflow via le termil ou dockercompose 
+
+installlation des depence 
+
+pip install -r requiermet.txt
