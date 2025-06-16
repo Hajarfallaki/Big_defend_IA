@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # PostgreSQL pour les données
   postgres:
@@ -133,10 +135,11 @@ services:
       - ELASTICSEARCH_PASSWORD=elastic_pass
       - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
     ports:
-      - "5044:5044"
       - "9600:9600"
     depends_on:
       elasticsearch:
+        condition: service_healthy
+      mongo:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-s", "http://localhost:9600"]

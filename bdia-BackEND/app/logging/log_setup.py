@@ -2,7 +2,7 @@
 
 import logging
 from app.logging.mongodb_logger import MongoDBHandler
-from app.logging.elasticsearch_logger import ElasticsearchHandler
+# from app.logging.elasticsearch_logger import ElasticsearchHandler
 
 def setup_logging():
     logger = logging.getLogger("big_defend_ai")
@@ -15,10 +15,10 @@ def setup_logging():
     console_handler.setFormatter(formatter)
 
     # Handler Elasticsearch
-    es_handler = ElasticsearchHandler()
-    es_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-    es_handler.setFormatter(es_formatter)
-    logger.addHandler(es_handler)
+    # es_handler = ElasticsearchHandler()
+    # es_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    # es_handler.setFormatter(es_formatter)
+    # logger.addHandler(es_handler)
 
     # MongoDB
     mongo_handler = MongoDBHandler()
