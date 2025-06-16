@@ -1,56 +1,136 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User } from '../types';
+import { ApiService } from '../services/apiService';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const mockUsers: User[] = [
-  { id: '1', name: 'Admin User', email: 'admin@bank.com', role: 'admin' },
-  { id: '2', name: 'Fraud Analyst', email: 'analyst@bank.com', role: 'analyst' },
-  { id: '3', name: 'Risk Manager', email: 'manager@bank.com', role: 'manager' },
-  { id: '4', name: 'John Client', email: 'client@email.com', role: 'client' },
-];
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Vérifie l'état d'authentification au montage
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        await refreshAuth();
+      } catch (err) {
+        console.error('Initial auth check failed:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initializeAuth();
+  }, []);
+
+  const refreshAuth = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const userData = await ApiService.auth.getCurrentUser();
+      setUser(userData);
+    } catch (err) {
+      handleAuthError(err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const login = async (email: string, password: string) => {
-    // Mock authentication
-    const foundUser = mockUsers.find(u => u.email === email);
-    if (foundUser) {
-      setUser(foundUser);
-    } else {
-      throw new Error('Invalid credentials');
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { access_token } = await ApiService.auth.login(email, password);
+      localStorage.setItem('auth_token', access_token);
+      await refreshAuth();
+    } catch (err) {
+      handleAuthError(err);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    setIsLoading(true);
+    try {
+      await ApiService.auth.logout();
+      localStorage.removeItem('auth_token');
+      setUser(null);
+    } catch (err) {
+      console.error('Logout failed:', err);
+      // Force logout even if API call fails
+      localStorage.removeItem('auth_token');
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAuthError = (error: any) => {
+    const errorMessage = error.response?.data?.message || error.message || 'Authentication failed';
+    setError(errorMessage);
+    console.error('Auth error:', error);
+    
+    // Auto-logout on 401 errors
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      login,
-      logout,
-      isAuthenticated: !!user
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        error,
+        login,
+        logout,
+        refreshAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+// Hook personnalisé pour vérifier les rôles
+export const useRole = (requiredRole: User['role']) => {
+  const { user } = useAuth();
+
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  if (user.role !== requiredRole) {
+    throw new Error(`Insufficient permissions. Required role: ${requiredRole}`);
+  }
+
+  return { user };
 };
