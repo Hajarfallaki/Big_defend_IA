@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, Request, Depends, HTTPException, WebSocket, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_users import FastAPIUsers
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -10,10 +10,11 @@ from app.core.config import settings
 from app.logging.log_setup import logger, setup_logging
 from app.models.user import User as UserModel
 from app.auth.user_manager import get_user_manager
-from app.routers import alerts, transaction, user , credit_card_transaction
+from app.routers import alerts, transaction, user , credit_card_transaction , logs
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport, JWTStrategy
 from app.schemas.user import UserRead, UserCreate
 from sqlalchemy import text
+from jose import jwt, JWTError
 
 # Initialiser l'application FastAPI
 app = FastAPI(
@@ -32,12 +33,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Configurer CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # ou ceci allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # Configuration de l'authentification
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=settings.SECRET_KEY, lifetime_seconds=3600)
@@ -59,6 +59,7 @@ app.include_router(alerts.router, prefix="/api/v1")
 app.include_router(transaction.router, prefix="/api/v1")
 app.include_router(user.router, prefix="/api/v1")
 app.include_router(credit_card_transaction.router, prefix="/api/v1")
+app.include_router(logs.router, prefix="/api/v1")
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
     prefix="/api/v1/auth/jwt",
@@ -164,3 +165,22 @@ async def log_requests(request: Request, call_next):
             }
         )
         raise
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    token = websocket.query_params.get("token")
+    if not token:
+        logger.error("WebSocket refused: no token provided")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"], options={"verify_aud": False})
+        logger.info(f"WebSocket JWT valid: {payload}")
+        await websocket.accept()
+        await websocket.send_text("WebSocket authentifié !")
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Echo: {data}")
+    except JWTError as e:
+        logger.error(f"WebSocket refused: JWTError: {e}")
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)

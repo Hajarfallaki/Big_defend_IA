@@ -35,7 +35,8 @@ async def add_credit_card_transaction(
         user_role = current_user.role
 
         # Check permissions
-        if user_role != Role.client_banque:
+        # if user_role != Role.client_banque:   a mettre ceci apres 
+        if user_role == Role.analyste:
             logger.error(
                 "Unauthorized attempt to add credit card transaction",
                 extra={

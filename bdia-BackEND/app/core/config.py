@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import List
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -8,11 +9,14 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://bdia_user:bdia_pass@localhost/bdia_db"
     SYNC_DATABASE_URL: str = "postgresql://bdia_user:bdia_pass@localhost/bdia_db"
     SECRET_KEY: str
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
+    ALLOWED_ORIGINS: List[str] = []
 
-
-    # # ✅ MongoDB : URI complète avec base incluse (logs_db)
-    # MONGODB_URI: str ="mongodb://localhost:27017/logs_db"
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def split_origins(cls, v):
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
     class Config:
         env_file = ".env"

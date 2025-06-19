@@ -49,7 +49,11 @@ async def register(
 ):
     try:
         # Vérifier si l'email existe
-        existing_user = await user_manager.get_by_email(user.email)
+        try:
+            existing_user = await user_manager.get_by_email(user.email)
+        except Exception as exc:
+            # Si l'utilisateur n'existe pas, continuer normalement
+            existing_user = None
         if existing_user:
             logger.warning(
                 "Attempt to register with existing email",
@@ -155,18 +159,25 @@ async def register(
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
         logger.error(
             "Failed to register user",
             extra={
                 "category": "error",
                 "email": user.email,
                 "details": {
-                    "error": str(e),
-                    "ip_address": request.client.host
+                    "role": user.role,
+                    "ip_address": request.client.host,
+                    "exception": str(e),
+                    "traceback": tb
                 }
             }
         )
-        raise HTTPException(status_code=500, detail=f"Erreur lors de l'inscription : {str(e)}")
+        raise HTTPException(status_code=500, detail={
+            "error": str(e),
+            "traceback": tb
+        })
 
 @router.get("/me", response_model=UserRead)
 @limiter.limit("10/minute")
@@ -606,3 +617,36 @@ async def change_password(
             }
         )
         raise HTTPException(status_code=500, detail=f"Erreur lors du changement de mot de passe : {str(e)}")
+
+@router.post("/create-admin-test", tags=["Users"])
+async def create_admin_test_user(db: AsyncSession = Depends(get_db)):
+    """
+    Crée un utilisateur admin (admin@bdia.com / admin123!) pour les tests.
+    À commenter ou supprimer après usage.
+    """
+    from app.models.user import User as UserModel
+    from sqlalchemy.future import select
+    from sqlalchemy.exc import IntegrityError
+    from app.auth.hash import hash_password
+
+    result = await db.execute(select(UserModel).where(UserModel.email == "admin@bdia.com"))
+    admin = result.scalar_one_or_none()
+    if admin:
+        return {"message": "Admin user already exists"}
+    hashed_pwd = hash_password("admin123!")
+    new_admin = UserModel(
+        email="admin@bdia.com",
+        hashed_password=hashed_pwd,
+        is_active=True,
+        is_superuser=True,
+        is_verified=True,
+        nom="Admin",
+        role="admin"
+    )
+    db.add(new_admin)
+    try:
+        await db.commit()
+        return {"message": "Admin user created", "email": new_admin.email}
+    except IntegrityError:
+        await db.rollback()
+        return {"message": "Admin user already exists (integrity error)"}
